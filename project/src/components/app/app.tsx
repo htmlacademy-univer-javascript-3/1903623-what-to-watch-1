@@ -8,20 +8,27 @@ import PlayerScreen from '../../pages/player-screen/player-screen';
 import NotFoundScreen from '../../pages/not-found-screen/not-found-screen';
 import PrivateRoute from '../private-route/private-route';
 import AddReviewScreen from '../../pages/add-review-screen/add-review-screen';
+import Promo from '../../types/promo';
+import Films from '../../types/films';
+import Reviews from '../../types/reviews';
+import Similar from '../../types/similar';
+import Favorite from '../../types/favorite';
 
-type headFilm = {
-  title: string,
-  genre: string,
-  year: number
+type AppProps = {
+  promo: Promo,
+  films: Films,
+  reviews: Reviews,
+  similar: Similar,
+  favorite: Favorite
 }
 
-function App(HeadFilmProps: headFilm): JSX.Element {
+function App(props: AppProps): JSX.Element {
   return (
     <BrowserRouter>
       <Routes>
         <Route
           path={AppRoute.Root}
-          element={<MainScreen headFilm = {HeadFilmProps} />}
+          element={<MainScreen promo={props.promo} films={props.films} />}
         />
         <Route
           path={AppRoute.SignIn}
@@ -31,28 +38,26 @@ function App(HeadFilmProps: headFilm): JSX.Element {
           path={AppRoute.MyList}
           element={
             <PrivateRoute
-              authorizationStatus={AuthorizationStatus.NoAuth}
+              authorizationStatus={AuthorizationStatus.Auth}
             >
-              <MyListScreen />
+              <MyListScreen myList={props.favorite}/>
             </PrivateRoute>
           }
         />
-
         <Route path={AppRoute.Player}>
           <Route
             path={':id'}
             element={<PlayerScreen />}
           />
         </Route>
-
         <Route path={AppRoute.Film}>
           <Route
             path={':id'}
-            element={<FilmScreen />}
+            element={<FilmScreen films={props.films} reviews={props.reviews} similar={props.similar}/>}
           >
           </Route>
           <Route
-            path={':id/review'}
+            path={`:id${AppRoute.AddReview}`}
             element={
               <PrivateRoute
                 authorizationStatus={AuthorizationStatus.Auth}
@@ -63,7 +68,6 @@ function App(HeadFilmProps: headFilm): JSX.Element {
           >
           </Route>
         </Route>
-
         <Route
           path={'*'}
           element={<NotFoundScreen />}
