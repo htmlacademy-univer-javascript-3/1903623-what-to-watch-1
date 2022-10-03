@@ -1,22 +1,33 @@
-import {MouseEvent} from 'react';
 import {Link} from 'react-router-dom';
+import {AppRoute} from '../../const';
+import PreviewPlayer from '../preview-player/preview-player';
 
 type FilmCardProps = {
+  id: number,
   title: string,
   image: string,
-  id: number,
-  mouseOverHandler: (evt: MouseEvent<HTMLDivElement>) => void;
+  previewVideo: string,
+  isPointed: boolean,
+  changeParentState: (id: number) => void
 }
 
+function FilmCard(props: FilmCardProps): JSX.Element {
+  const {id, title, image, previewVideo, isPointed, changeParentState} = props;
 
-function FilmCard({title, image, id, mouseOverHandler}: FilmCardProps): JSX.Element {
   return (
-    <article className="small-film-card catalog__films-card" onMouseOver={mouseOverHandler}>
+    <article
+      className="small-film-card catalog__films-card"
+      onMouseEnter={() => changeParentState(id)}
+      onMouseLeave={() => changeParentState(NaN)}
+    >
       <div className="small-film-card__image">
-        <img src={image} alt={title} width="280" height="175"/>
+        {
+          isPointed ? <PreviewPlayer image={image} previewVideo={previewVideo} />
+            : <img src={image} alt={title} width="280" height="175"/>
+        }
       </div>
       <h3 className="small-film-card__title">
-        <Link className="small-film-card__link" to={`/films/${id}`}>{title}</Link>
+        <Link className="small-film-card__link" to={`${AppRoute.Film}/${id}`}>{title}</Link>
       </h3>
     </article>
   );
