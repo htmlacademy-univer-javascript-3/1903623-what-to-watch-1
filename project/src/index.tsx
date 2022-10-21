@@ -8,6 +8,11 @@ import promo from './mocks/promo';
 import COMMENTS from './mocks/comments';
 import SIMILAR from './mocks/similar';
 import FAVORITE from './mocks/favorite';
+import ErrorMessage from './components/error-message/error-message';
+import {checkAuthAction, fetchFilmsAction} from './store/api-actions';
+
+store.dispatch(fetchFilmsAction());
+store.dispatch(checkAuthAction());
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
@@ -16,6 +21,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Provider store={store}>
+      <ErrorMessage />
       <App
         promo={promo}
         films={FILMS}
