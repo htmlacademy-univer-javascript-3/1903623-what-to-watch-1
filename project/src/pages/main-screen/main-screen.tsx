@@ -1,16 +1,26 @@
 import Logo from '../../components/logo/logo';
 import PromoCard from '../../components/promo-card/promo-card';
 import FilmList from '../../components/film-list/film-list';
-import Promo from '../../types/promo';
+import {useAppDispatch, useAppSelector} from '../../hooks';
+import {useEffect} from 'react';
+import {getAuthorizationStatus} from '../../store/user-process/selectors';
+import {AuthorizationStatus} from '../../const';
+import {fetchFavoriteFilmsAction} from '../../store/api-actions';
 
-type MainScreenProps = {
-  promo: Promo,
-}
 
-function MainScreen(props: MainScreenProps): JSX.Element {
+function MainScreen(): JSX.Element {
+  const dispatch = useAppDispatch();
+  const authStatus = useAppSelector(getAuthorizationStatus);
+
+  useEffect(() => {
+    if (authStatus === AuthorizationStatus.Auth) {
+      dispatch(fetchFavoriteFilmsAction());
+    }
+  }, [authStatus, dispatch]);
+
   return (
     <>
-      <PromoCard promo={props.promo} />
+      <PromoCard />
 
       <div className="page-content">
         <FilmList />

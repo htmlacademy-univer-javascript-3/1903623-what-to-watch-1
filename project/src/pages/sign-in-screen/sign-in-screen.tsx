@@ -1,13 +1,17 @@
 import Logo from '../../components/logo/logo';
-import {useAppDispatch} from '../../hooks';
-import {useRef} from 'react';
+import {useAppDispatch, useAppSelector} from '../../hooks';
+import {useRef, useState} from 'react';
 import {loginAction} from '../../store/api-actions';
 import {AuthData} from '../../types/auth-data';
+import {AppRoute, AuthorizationStatus} from '../../const';
+import {Navigate} from 'react-router-dom';
+import {getAuthorizationStatus} from '../../store/user-process/selectors';
 
 function SignInScreen(): JSX.Element {
+  const authStatus = useAppSelector(getAuthorizationStatus);
+
   const emailRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
-
 
   const dispatch = useAppDispatch();
 
@@ -15,17 +19,26 @@ function SignInScreen(): JSX.Element {
     dispatch(loginAction(authData));
   };
 
-  // const handleSubmit = (evt: FormEvent<HTMLFormElement>) => {
-  //   evt.preventDefault();
-  //
-  //   if (emailRef.current !== null && passwordRef.current !== null) {
-  //     onSubmit({
-  //       email: emailRef.current.value,
-  //       password: passwordRef.current.value,
-  //     });
-  //   }
-  // };
+  const checkEmail = (email: string): boolean => {
+    const result = /\S+@\S+\.\S+/.test(email);
+    setIsInvalidEmail(!result);
 
+    return result;
+  };
+
+  const checkPassword = (password: string): boolean => {
+    const result = /(?=.*[0-9])(?=.*[a-zA-Z])[0-9a-zA-Z]{2,}/.test(password);
+    setIsInvalidPassword(!result);
+
+    return result;
+  };
+
+  const [isInvalidEmail, setIsInvalidEmail] = useState(false);
+  const [isInvalidPassword, setIsInvalidPassword] = useState(false);
+
+  if (authStatus === AuthorizationStatus.Auth) {
+    return <Navigate to={AppRoute.Root} />;
+  }
   return (
     <div className="user-page">
       <header className="page-header user-page__head">
@@ -38,10 +51,22 @@ function SignInScreen(): JSX.Element {
         <form
           action="#"
           className="sign-in__form"
-          //onSubmit={handleSubmit}
         >
+          {
+            isInvalidEmail &&
+            <div className="sign-in__message">
+              <p>Please enter a valid email address</p>
+            </div>
+          }
+          {
+            isInvalidPassword &&
+            <div className="sign-in__message">
+              <p>Please enter a valid password</p>
+            </div>
+          }
+
           <div className="sign-in__fields">
-            <div className="sign-in__field">
+            <div className={`sign-in__field ${isInvalidEmail && 'sign-in__field--error'}`}>
               <input
                 className="sign-in__input"
                 type="email"
@@ -49,10 +74,12 @@ function SignInScreen(): JSX.Element {
                 name="user-email"
                 id="user-email"
                 ref={emailRef}
+                onChange={() => setIsInvalidEmail(false)}
               />
               <label className="sign-in__label visually-hidden" htmlFor="user-email">Email address</label>
             </div>
-            <div className="sign-in__field">
+
+            <div className={`sign-in__field ${isInvalidPassword && 'sign-in__field--error'}`}>
               <input
                 className="sign-in__input"
                 type="password"
@@ -60,6 +87,7 @@ function SignInScreen(): JSX.Element {
                 name="user-password"
                 id="user-password"
                 ref={passwordRef}
+                onChange={() => setIsInvalidPassword(false)}
               />
               <label className="sign-in__label visually-hidden" htmlFor="user-password">Password</label>
             </div>
@@ -72,15 +100,15 @@ function SignInScreen(): JSX.Element {
               onClick={(evt) => {
                 evt.preventDefault();
 
-                if (emailRef.current !== null && passwordRef.current !== null) {
+                if (emailRef.current !== null
+                  && passwordRef.current !== null
+                  && checkEmail(emailRef.current?.value)
+                  && checkPassword(passwordRef.current?.value)) {
                   onSubmit({
                     email: emailRef.current.value,
                     password: passwordRef.current.value,
                   });
                 }
-
-                // navigate(AppRoute.Root);
-
               }}
             >
               Sign in
